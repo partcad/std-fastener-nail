@@ -1,0 +1,301 @@
+{#-
+  Nails: the interfaces a nail is driven through and held by, and - in the two
+  sub-packages beside this file - the imperial and the metric nails themselves.
+
+  The repository is laid out the way '//pub/std/metric/cqwarehouse' is: one
+  folder, one package per YAML file. 'imperial.yaml' and 'metric.yaml' are
+  local dependencies of this one, so they share this folder - and with it the
+  one script every nail is built by ('nail.py'), the expressions every nail's
+  ports are placed by ('nail.j2'), and their tables ('imperial.j2',
+  'metric.j2').
+-#}
+
+{#-
+  The parent of a target: the same target, 0.1 mm narrower, down to 0.5 mm.
+  A string rather than a macro, because 'pc lint' masks the template's tags
+  and not what is between them, and a macro's body would be left standing at
+  the top level of the YAML.
+-#}
+{%- set NARROWER = "('FAMILY;width=' + str(round(round(width, 1) - 0.1, 1)) + ',depth=' + str(depth)) if round(width, 1) > 0.5 else 'nail-entry'" -%}
+
+partcad: ">=0.8.170"
+name: //pub/std/fastener/nail
+desc: >-
+  Nails for timber construction, classified by ASTM F1667, F547 and C514 and by
+  EN 14592 and EN 1995-1-1: the interfaces they are driven through and held by,
+  and the imperial and metric nails in two sub-packages.
+url: https://github.com/partcad/std-fastener-nail
+
+# A standard size is a specification rather than a product: nobody sells "a
+# 16d common nail", they sell a box of them under an SKU. What can be ordered is
+# a store's instance of one of these parts with its vendor and SKU on it - the
+# way '//pub/svc/commerce/homedepot' declares its lumber as instances of
+# '//pub/std/imperial/dimensional-lumber' - and that instance is what 'pc test'
+# should hold to being obtainable. So nothing here claims to be, and the
+# sub-packages inherit that.
+manufacturable: false
+
+cover:
+  assembly: example/indoor
+
+dependencies:
+  imperial:
+    desc: Imperial nails - the ASTM F1667 styles of timber construction, by pennyweight and gauge
+    type: local
+    path: imperial.yaml
+  metric:
+    desc: Metric nails - the DIN 1151 sizes with EN 10230-1 heads, and any nail EN 14592 declares
+    type: local
+    path: metric.yaml
+  # The materials, and the lumber the examples nail into.
+  pub:
+    onlyInRoot: true
+    type: git
+    url: https://github.com/partcad/partcad-index.git
+
+docs:
+  name: //pub/std/fastener/nail
+  intro: |
+    Nails for timber construction, as parametric parts with four ports, and the
+    interfaces that say where a nail can go, which nails can go there, which of
+    them can go there outdoors, and how a nail is held while it is driven.
+
+    The nails are in two sub-packages, as their standards are:
+
+    * [`//pub/std/fastener/nail/imperial`](README_imperial.md) - the ASTM F1667
+      styles: common, box, sinker, cooler, finishing, casing, gypsum wallboard,
+      roofing and connector nails, by pennyweight and gauge
+      ([every size](CATALOGUE_imperial.md)).
+    * [`//pub/std/fastener/nail/metric`](README_metric.md) - the DIN 1151 sizes,
+      flat and countersunk, with EN 10230-1's heads, and a nail of any size as
+      EN 14592 has one declared ([every size](CATALOGUE_metric.md)).
+
+    The interfaces are here, and are the same for both: a 0.131 in. 8d common
+    and a 3.4 x 90 mm wire nail go into the same places, by the same rules.
+
+    <table><tr>
+    <td align=center valign=bottom><a href="./common/16d.ports.svg"><img src="./common/16d.ports.svg" height="260"></a><br/>The four ports of <code>imperial:common/16d</code></td>
+    <td align=center valign=bottom><a href="./example/indoor.svg"><img src="./example/indoor.svg" height="260"></a><br/><code>example/indoor</code></td>
+    <td align=center valign=bottom><a href="./example/outdoor.svg"><img src="./example/outdoor.svg" height="260"></a><br/><code>example/outdoor</code></td>
+    </tr></table>
+
+    <a href="./example/anatomy.svg"><img src="./example/anatomy.svg" width="640" alt="example/anatomy"></a><br/>
+    <code>example/anatomy</code>: four heads (flat, countersunk, casing, brad), three shanks
+    (smooth, ring, screw) and five points (diamond, long diamond, needle, blunt, chisel).
+
+    | Interface | What it is |
+    |---|---|
+    | `nail-target;width=,depth=` | A place to drive a nail into: any nail up to `width` mm, up to `depth` mm deep. The connection's `drive` says how far in. |
+    | `nail-target-outdoor;width=,depth=` | The same, outdoors: outdoor nails only. |
+    | `nail-point;d=` | A nail's tip, by its shank to 0.1 mm - what decides where it fits. |
+    | `nail-point-outdoor;d=` | The tip of a nail that lasts outdoors: hot-dip galvanized, stainless or copper. It fits indoor targets too. |
+    | `nail-grip;d=` | One grasp across the shank: two opposite ports for a gripper's two jaws. What every catalogue nail is held by. |
+    | `nail-head` | Where a hammer, a nailer's driver or a nail set strikes. |
+
+    [INTERFACES.md](INTERFACES.md) says how each of them works and why - the
+    four ports, the 0.1 mm inheritance chain that lets a target take every
+    nail not wider than it, why an outdoor target is a sibling of the indoor
+    one rather than its child, and which finishes count as outdoor.
+    [CLASSIFICATION.md](CLASSIFICATION.md) maps the parameters onto ASTM F1667,
+    F547 and C514 and onto EN 14592, EN 10230-1 and EN 1995-1-1, and lists the
+    sources.
+  usage: |
+    ```shell
+    pc list parts -r //pub/std/fastener/nail                   # every nail
+    pc info -i "//pub/std/fastener/nail:nail-target;width=6,depth=88.9"
+    pc render -t svg --with-ports //pub/std/fastener/nail/imperial:common/16d
+    pc test -a //pub/std/fastener/nail:example/indoor          # nails driven into a post
+    ```
+
+    From another package, a place to nail into:
+
+    ```yaml
+    parts:
+      deck-board:
+        # ...
+        implements:
+          "//pub/std/fastener/nail:nail-target-outdoor;width=4.2,depth=60":
+            A: [[20, 70, 25], [1, 0, 0], 180]
+    ```
+
+sketches:
+  nail-circle:
+    desc: A circle - the outline drawn on the ports of a nail and of the places it goes into
+    type: basic
+    circle: "%d / 2%"
+    parameters:
+      d:
+        type: float
+        default: 3.0
+
+interfaces:
+  #
+  # Where a nail goes.
+  #
+
+  # What every place a nail goes into has, whatever goes into it: a port on the
+  # surface, with +Z pointing into the material. Abstract, so that the two
+  # targets below can share it without either being a drop-in for the other.
+  nail-entry:
+    desc: Where a nail enters a surface - what every nail target has in common
+    abstract: true
+    ports:
+      entry:
+
+  nail-target:
+    desc: A place to drive a nail up to %width% mm across into, up to %depth% mm deep
+    parameters:
+      width: 6.0
+      depth: 50.0
+      # How far the nail has been driven: from its point touching the surface,
+      # at 0, to as deep as the place lets it go. Down the port's -Z, which a
+      # connection has turned to point into the material.
+      drive:
+        type: move
+        dir: [0, 0, -1]
+        min: 0
+        max: "%depth%"
+        default: 0
+    # A target is a drop-in for the one 0.1 mm narrower: it takes everything
+    # that one takes, and the nails of its own width besides.
+    inherits:
+      "%{{ NARROWER | replace('FAMILY', 'nail-target') }}%":
+        "":
+          sketch: "nail-circle;d=%width%"
+    mates:
+      # A nail makes its own hole: the two are expected to share the space it
+      # displaces, which is what 'snapIn' tells 'pc test'.
+      "nail-point;d=%round(width, 1)%":
+        snapIn: true
+
+  nail-target-outdoor:
+    desc: A place outdoors to drive a nail up to %width% mm across into, up to %depth% mm deep - an outdoor nail only
+    parameters:
+      width: 6.0
+      depth: 50.0
+      drive:
+        type: move
+        dir: [0, 0, -1]
+        min: 0
+        max: "%depth%"
+        default: 0
+    # Not 'nail-target': see "Outdoor" in the docs above.
+    inherits:
+      "%{{ NARROWER | replace('FAMILY', 'nail-target-outdoor') }}%":
+        "":
+          sketch: "nail-circle;d=%width%"
+    mates:
+      "nail-point-outdoor;d=%round(width, 1)%":
+        snapIn: true
+
+  #
+  # The nail's own.
+  #
+
+  nail-point:
+    desc: The point of a nail %d% mm across, to the nearest 0.1 mm
+    parameters:
+      d: 3.0
+    ports:
+      tip:
+        sketch: "nail-circle;d=%d%"
+
+  # A drop-in for 'nail-point': an outdoor nail goes wherever any nail does.
+  nail-point-outdoor:
+    desc: The point of a nail %d% mm across that will last outdoors
+    parameters:
+      d: 3.0
+    inherits:
+      "nail-point;d=%d%":
+
+  nail-head:
+    desc: Where a hammer's face, a nailer's driver or a nail set meets a nail
+    ports:
+      head:
+
+  # One grasp, both jaws: what a two-jawed tool closes on. The ports are on the
+  # shank's surface, so the interface is as wide as the shank it is on.
+  nail-grip:
+    desc: A grasp across a nail's %d% mm shank - the two opposite faces a gripper's jaws close on
+    parameters:
+      d: 3.0
+    ports:
+      left-grip:
+        location: [["%d / 2%", 0, 0], [0, 1, 0], -90]
+        sketch: "nail-circle;d=%d / 2%"
+      right-grip:
+        location: [["%-d / 2%", 0, 0], [1, 0, 1], 180]
+        sketch: "nail-circle;d=%d / 2%"
+
+parts:
+  #
+  # Examples: something to drive these nails into.
+  #
+
+  example/post:
+    desc: A foot of 4x4 with two places on its top face to nail into - an indoor target, which takes any nail
+    type: enrich
+    source: //pub/std/imperial/dimensional-lumber:lumber
+    with:
+      width: 4
+      height: 4
+      length: 12
+    # The post is 3-1/2 in. (88.9 mm) square, so a nail can go 88.9 mm into its
+    # top face. It is softwood and is not drilled, so it takes nails up to 6 mm
+    # (EN 1995-1-1 8.3.1).
+    implements:
+      "nail-target;width=6,depth=88.9":
+        A: [[44.45, 76.2, 88.9], [1, 0, 0], 180]
+        B: [[44.45, 228.6, 88.9], [1, 0, 0], 180]
+
+  example/deck-post:
+    desc: The same post, for a deck - an outdoor target, which takes outdoor nails only
+    type: enrich
+    source: //pub/std/imperial/dimensional-lumber:lumber
+    with:
+      width: 4
+      height: 4
+      length: 12
+    implements:
+      "nail-target-outdoor;width=6,depth=88.9":
+        A: [[44.45, 76.2, 88.9], [1, 0, 0], 180]
+        B: [[44.45, 228.6, 88.9], [1, 0, 0], 180]
+
+assemblies:
+  example/indoor:
+    type: assy
+    desc: An indoor post takes any nail - an imperial one, bright, driven home, and a metric one, galvanized, being driven
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+
+  example/outdoor:
+    type: assy
+    desc: An outdoor post takes outdoor nails only - an imperial one, galvanized, driven home, and a metric one, stainless, being driven
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+
+  # Here rather than beside the imperial nails it is drawn with: a package that
+  # names its README's 'path' cannot also declare an assembly, as of PartCAD
+  # 0.8.170 - the assembly's 'readme' takes that 'path' for its implementation.
+  example/anatomy:
+    type: assy
+    desc: >-
+      The words of the classification, left to right: four heads (flat, countersunk,
+      casing, brad), three shanks (smooth, ring, screw) and five points (diamond,
+      long diamond, needle, blunt, chisel)
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+
+render:
+  readme:
+    exclude:
+      - packages
+      - parts
+      - interfaces
+      - sketches

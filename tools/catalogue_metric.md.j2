@@ -1,0 +1,22 @@
+{% from 'metric.j2' import families, sizes, heads %}{% from 'nail.j2' import number %}
+# The metric nails of `//pub/std/fastener/nail/metric`
+
+Every DIN 1151 size, in both head forms, with the head EN 10230-1 gives its
+wire. Each part is `//pub/std/fastener/nail/metric:<form>/<d>x<l>`, in
+millimetres. "Head from" says where the head diameter comes from. "Point" is
+the `nail-point` interface the nail implements, which decides where it fits.
+"8d / 6d" is the pointside penetration EN 1995-1-1 asks of it, smooth and
+profiled. "Per kg" is the approximate count per kilogram of the maker the sizes
+come from. Any other size is the `nail` part. See
+[CLASSIFICATION.md](CLASSIFICATION.md) and [README_metric.md](README_metric.md).
+{% for f in families %}
+## {{ f.title }}: DIN 1151 form {{ f.din1151 }}
+
+{{ f.use }} Length measured {{ "under the head" if f.measured == "under-head" else "overall" }}.
+
+| Part | d, mm | l, mm | Head, mm | Head from | Point | 8d / 6d, mm | Per kg |
+|---|---|---|---|---|---|---|---|
+{%- for d, l, count in sizes %}
+| `{{ f.name }}/{{ "%.1f" | format(d) }}x{{ l }}` | {{ "%.1f" | format(d) }} | {{ l }} | {{ heads[d][0] }} | {{ heads[d][1] }} | `d={{ number(d | round(1)) }}` | {{ (8 * d) | round(1) }} / {{ (6 * d) | round(1) }} | {{ count }} |
+{%- endfor %}
+{% endfor %}

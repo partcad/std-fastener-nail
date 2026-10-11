@@ -1,0 +1,159 @@
+{#-
+  The imperial nails: every part below is generated from 'imperial.j2', built
+  by 'nail.py', and implements the interfaces of the package above this one
+  ('partcad.yaml' beside this file) through the expressions in 'nail.j2'.
+-#}
+{%- from 'imperial.j2' import families, inches -%}
+{%- from 'nail.j2' import FLAT_T, DEPTH, GRIP, METAL, materials, coatings, POINT, HEAD, GRASP, number -%}
+
+{#- One nail of each family is drawn and checked in, as the README's gallery. -#}
+{%- set gallery = {
+  "common": "16d",
+  "box": "16d",
+  "sinker": "16d",
+  "cooler": "6d",
+  "finishing": "8d",
+  "casing": "8d",
+  "gypsum-wallboard": "13ga-1.25in-0.297",
+  "gypsum-wallboard-ring": "12.5ga-1.25in",
+  "roofing": "11ga-1.25in",
+  "connector": "10d-1.5in",
+} -%}
+
+partcad: ">=0.8.170"
+desc: >-
+  Imperial nails: the ASTM F1667 styles of timber construction - common, box,
+  sinker, cooler, finishing, casing, gypsum wallboard, roofing and connector
+  nails - by pennyweight and gauge.
+
+docs:
+  name: //pub/std/fastener/nail/imperial
+  intro: |
+    The ASTM F1667 nails a timber frame, its sheathing, its trim and its roof
+    are put together with. Every one has the four ports and implements the
+    interfaces of [`//pub/std/fastener/nail`](README.md), which also says how
+    they are classified and what "outdoor" means.
+
+    <table><tr>
+    {%- for name in ["common", "box", "sinker", "cooler", "finishing"] %}
+    <td align=center valign=bottom><a href="./{{ name }}/{{ gallery[name] }}.svg"><img src="./{{ name }}/{{ gallery[name] }}.svg" height="200"></a><br/><code>{{ name }}/{{ gallery[name] }}</code></td>
+    {%- endfor %}
+    </tr><tr>
+    {%- for name in ["casing", "gypsum-wallboard", "gypsum-wallboard-ring", "roofing", "connector"] %}
+    <td align=center valign=bottom><a href="./{{ name }}/{{ gallery[name] }}.svg"><img src="./{{ name }}/{{ gallery[name] }}.svg" height="120"></a><br/><code>{{ name }}/{{ gallery[name] }}</code></td>
+    {%- endfor %}
+    </tr></table>
+
+    Each part is `<family>/<size>`. The dimensions are fixed, as the standard
+    gives them; the shank, the point, the coating and the material are
+    parameters, defaulting to what the standard's table describes. A size the
+    tables do not have is `//pub/std/fastener/nail/metric:nail` with
+    dimensions of its own. Every size, with its dimensions, its point
+    interface and what EN 1995-1-1 asks of its penetration, is in
+    [CATALOGUE_imperial.md](CATALOGUE_imperial.md).
+
+    | Family | ASTM F1667 | Head | Length | By default | Sizes |
+    |---|---|---|---|---|---|
+    {%- for f in families %}
+    | `{{ f.name }}` | {% if f.f1667 %}{% for id in f.f1667.split('/') %}`NL{{ id }}`{% if not loop.last %}, {% endif %}{% endfor %}{% else %}-{% endif %} | {{ f.head }} | {{ "under the head" if f.measured == "under-head" else "overall" }} | {{ f.shank }} shank, {{ f.point }} point, {{ f.coating }} | {{ f.rows | length }}: `{{ f.rows[0][0] }}` to `{{ f.rows[-1][0] }}` |
+    {%- endfor %}
+
+  usage: |
+    ```shell
+    pc list parts //pub/std/fastener/nail/imperial
+    pc info //pub/std/fastener/nail/imperial:common/16d
+    pc info "//pub/std/fastener/nail/imperial:common/16d;shank=ring,point=needle"
+    pc info "//pub/std/fastener/nail/imperial:common/16d;material=//pub/std/manufacturing/material/metal:ss-304"
+    ```
+
+parts:
+{%- for f in families %}
+{%- for row in f.rows %}
+  {%- set name, L, D, H, count = row %}
+  {%- set d_mm = (D * INCH) | round(4) %}
+
+  {{ f.name }}/{{ name }}:
+    type: build123d
+    path: nail.py
+    desc: >-
+      {{ name }} {{ f.title | lower | replace("nails", "nail") }}:
+      {{ inches(L) }} in. long, {{ "%.3f" | format(D) }} in. shank, {{ "%.3f" | format(H) }} in. {{ f.head }} head.
+      {%- if f.f1667 %} ASTM F1667 {% for id in f.f1667.split('/') %}NL{{ id }}{% if not loop.last %} or {% endif %}{% endfor %} (Table{{ "s" if "-" in (f.table | string) else "" }} {{ f.table }}).{% endif %} {{ f.source }}.
+    parameters:
+      d:
+        type: float
+        desc: The shank, before any deformation, in mm ({{ "%.3f" | format(D) }} in.)
+        enum: [{{ d_mm }}]
+        default: {{ d_mm }}
+      length:
+        type: float
+        desc: The length, measured {{ f.measured }}, in mm ({{ inches(L) }} in.)
+        enum: [{{ (L * INCH) | round(4) }}]
+        default: {{ (L * INCH) | round(4) }}
+      measured:
+        type: string
+        enum: [{{ f.measured }}]
+        default: {{ f.measured }}
+      head:
+        type: string
+        enum: [{{ f.head }}]
+        default: {{ f.head }}
+      head_d:
+        type: float
+        desc: The head, in mm ({{ "%.3f" | format(H) }} in.)
+        enum: [{{ (H * INCH) | round(4) }}]
+        default: {{ (H * INCH) | round(4) }}
+      shank:
+        type: string
+        enum: [smooth, ring, screw]
+        default: {{ f.shank }}
+      point:
+        type: string
+        enum: [diamond, long-diamond, needle, blunt, chisel]
+        default: {{ f.point }}
+      coating:
+        type: string
+        enum: {{ coatings }}
+        default: {{ f.coating }}
+      material:
+        type: string
+        enum:
+        {%- for m in materials %}
+          - "{{ METAL }}{{ m }}"
+        {%- endfor %}
+        default: "{{ METAL }}steel-1018"
+    implements:
+      "{{ POINT }}": [[0, 0, "%-{{ DEPTH }}%"], [0, 0, 1], 0]
+      "{{ HEAD }}": [[0, 0, "%{{ FLAT_T }} if head == 'flat' else 0%"], [1, 0, 0], 180]
+      "{{ GRASP }}": [[0, 0, "%-{{ GRIP }}%"], [0, 0, 1], 0]
+    connect:
+      # By its grasp, both jaws at once - see "Holding" in the root package.
+      hold: "nail-grip;d={{ number(d_mm) }}"
+      holdForceMin: 5
+      holdForceMax: 50
+    {%- if gallery[f.name] == name %}
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+      {%- if f.name == "common" %}
+      svg-with-ports:
+        desc: The projection, with every port marked and named.
+        package: //builtin/render
+        path: render_svg.py
+        extension: ports.svg
+        with_ports: true
+        reproducible: true
+        precision: 4
+      {%- endif %}
+    {%- endif %}
+{%- endfor %}
+{%- endfor %}
+
+render:
+  readme:
+    path: README_imperial.md
+    exclude:
+      - parts
+      - interfaces
+      - sketches

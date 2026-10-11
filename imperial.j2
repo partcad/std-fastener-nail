@@ -1,0 +1,273 @@
+{#-
+  The imperial nails this repository builds, as the standards state them.
+
+  Every number below is in inches, the unit the source tables are written in;
+  'imperial.yaml' converts them to millimetres (INCH = 25.4) on the way to
+  the script, which works in millimetres like everything else in PartCAD.
+
+  Where they come from:
+
+  * ASTM F1667 is the specification these nails are bought to. Its Table 1
+    gives every style an identifier and a table of its own - those are the
+    'f1667' and 'table' fields - and section 8 says how a nail is measured:
+    from under the head where the head is flat, overall otherwise.
+
+  * The dimensions are those of US Federal Specification FF-N-105B, which
+    ASTM F1667 replaced and which is public: the 'source' field names the
+    paragraph each family is copied from. ASTM F1667's own tables are not
+    reproduced here. Where the two can be compared they agree - F1667's
+    example part number NLCL-09 is "a cooler nail with a length of 2-7/8,
+    a shank diameter of 0.120, and a head diameter of 0.297", which is row 9
+    of the cooler table below - and so does MiTek's published table for the
+    common and sinker sizes it stocks. That is not the same as having
+    checked every row against F1667, and a row that disagrees with a copy of
+    F1667 should be corrected to it.
+
+  * The connector nails are not an F1667 style. They are common-nail wire
+    cut short for the holes in joist hangers and other metal connectors, and
+    their sizes are from MiTek's nail table. That table states no head, so
+    theirs is the head of the common nail of the same pennyweight, and its
+    counts per pound are for coated nails, so none is given for them here.
+
+  Each row is:
+
+      [name, L, D, H, approximate count per pound]
+
+  L is the length as the family's 'measured' says, D the shank diameter
+  before any deformation (F1667 8.3), H the head diameter. The count per
+  pound is the source's, for bright smooth nails; nothing builds from it,
+  but it is what a nail's volume times the density of steel has to come
+  back to, and that is how this table was checked against 'nail.py'. Where
+  a nail is mostly shank the two agree to within about 10 %. Where it is mostly
+  head - roofing and smooth gypsum-board nails, the smallest sinkers - the
+  model is up to a third heavier, because no table states how thick a head
+  is and 'nail.py' has to assume one. Three of the source's own counts are
+  low for its own dimensions whatever the head: the 2d and 3d cooler and
+  the 60d common.
+
+  'shank', 'point' and 'coating' are each family's default, as its source
+  describes it. Every one of them can be asked for differently: ASTM F1667
+  makes deformed shanks and the coatings a matter of what was ordered.
+-#}
+
+{%- set families = [
+  {
+    "name": "common",
+    "title": "Common nails",
+    "f1667": "CMS", "table": 15,
+    "source": "FF-N-105B 3.6.11.2",
+    "use": "Framing and general construction: the nail structural nailing schedules are written in.",
+    "head": "flat", "measured": "under-head",
+    "shank": "smooth", "point": "diamond", "coating": "bright",
+    "rows": [
+      ["2d", 1, 0.072, 0.172, 847],
+      ["3d", 1.25, 0.080, 0.203, 543],
+      ["4d", 1.5, 0.099, 0.250, 294],
+      ["5d", 1.75, 0.099, 0.250, 254],
+      ["6d", 2, 0.113, 0.266, 167],
+      ["7d", 2.25, 0.113, 0.266, 160],
+      ["8d", 2.5, 0.131, 0.281, 101],
+      ["9d", 2.75, 0.131, 0.281, 92],
+      ["10d", 3, 0.148, 0.312, 66],
+      ["12d", 3.25, 0.148, 0.312, 61],
+      ["16d", 3.5, 0.162, 0.344, 47],
+      ["20d", 4, 0.192, 0.406, 30],
+      ["30d", 4.5, 0.207, 0.438, 23],
+      ["40d", 5, 0.226, 0.469, 17],
+      ["50d", 5.5, 0.244, 0.500, 14],
+      ["60d", 6, 0.262, 0.531, 12],
+    ],
+  },
+  {
+    "name": "box",
+    "title": "Box nails",
+    "f1667": "BXA/BXB", "table": "6-7",
+    "source": "FF-N-105B 3.6.5",
+    "use": "Thinner than a common nail of the same length, so that it splits less: light framing, siding, boxes.",
+    "head": "flat", "measured": "under-head",
+    "shank": "smooth", "point": "diamond", "coating": "bright",
+    "rows": [
+      ["2d", 1, 0.067, 0.188, 940],
+      ["3d", 1.25, 0.076, 0.219, 588],
+      ["4d", 1.5, 0.080, 0.219, 453],
+      ["5d", 1.75, 0.080, 0.219, 389],
+      ["6d", 2, 0.099, 0.266, 225],
+      ["7d", 2.25, 0.099, 0.266, 200],
+      ["8d", 2.5, 0.113, 0.297, 136],
+      ["9d", 2.75, 0.113, 0.297, 124],
+      ["10d", 3, 0.128, 0.312, 90],
+      ["12d", 3.25, 0.128, 0.312, 83],
+      ["16d", 3.5, 0.135, 0.344, 69],
+      ["20d", 4, 0.148, 0.375, 50],
+      ["30d", 4.5, 0.148, 0.375, 45],
+      ["40d", 5, 0.162, 0.406, 34],
+    ],
+  },
+  {
+    "name": "sinker",
+    "title": "Sinker nails",
+    "f1667": "SK", "table": 11,
+    "source": "FF-N-105B 3.6.9",
+    "use": "Framing with a countersunk head that sets flush, cement coated to hold better.",
+    "head": "countersunk", "measured": "overall",
+    "shank": "smooth", "point": "diamond", "coating": "cement-coated",
+    "rows": [
+      ["3d", 1.125, 0.067, 0.172, 923],
+      ["4d", 1.375, 0.080, 0.203, 527],
+      ["5d", 1.625, 0.086, 0.219, 387],
+      ["6d", 1.875, 0.092, 0.234, 293],
+      ["7d", 2.125, 0.099, 0.250, 223],
+      ["8d", 2.375, 0.113, 0.266, 153],
+      ["10d", 2.875, 0.120, 0.281, 111],
+      ["12d", 3.125, 0.135, 0.312, 81],
+      ["16d", 3.25, 0.148, 0.344, 64],
+      ["20d", 3.75, 0.177, 0.375, 40],
+      ["30d", 4.25, 0.192, 0.406, 30],
+      ["40d", 4.75, 0.207, 0.438, 23],
+      ["60d", 5.75, 0.244, 0.500, 14],
+    ],
+  },
+  {
+    "name": "cooler",
+    "title": "Cooler nails",
+    "f1667": "CL", "table": 10,
+    "source": "FF-N-105B 3.6.8",
+    "use": "Thin, flat headed and cement coated: sheathing and gypsum board. Measured overall, head included.",
+    "head": "flat", "measured": "overall",
+    "shank": "smooth", "point": "diamond", "coating": "cement-coated",
+    "rows": [
+      ["2d", 1, 0.067, 0.172, 1110],
+      ["3d", 1.125, 0.076, 0.188, 839],
+      ["4d", 1.375, 0.080, 0.219, 493],
+      ["5d", 1.625, 0.086, 0.234, 366],
+      ["6d", 1.875, 0.092, 0.250, 278],
+      ["7d", 2.125, 0.099, 0.266, 212],
+      ["8d", 2.375, 0.113, 0.281, 144],
+      ["9d", 2.625, 0.113, 0.281, 131],
+      ["10d", 2.875, 0.120, 0.297, 105],
+    ],
+  },
+  {
+    "name": "finishing",
+    "title": "Finishing nails",
+    "f1667": "FH", "table": 20,
+    "source": "FF-N-105B 3.6.15",
+    "use": "Trim and cabinetry: a brad head small enough to set below the surface and fill over.",
+    "head": "brad", "measured": "overall",
+    "shank": "smooth", "point": "diamond", "coating": "bright",
+    "rows": [
+      ["2d", 1, 0.058, 0.086, 1473],
+      ["3d", 1.25, 0.067, 0.099, 880],
+      ["4d", 1.5, 0.072, 0.106, 630],
+      ["5d", 1.75, 0.072, 0.106, 535],
+      ["6d", 2, 0.092, 0.135, 288],
+      ["7d", 2.25, 0.092, 0.135, 254],
+      ["8d", 2.5, 0.099, 0.142, 190],
+      ["9d", 2.75, 0.099, 0.142, 178],
+      ["10d", 3, 0.113, 0.155, 124],
+      ["12d", 3.25, 0.113, 0.155, 113],
+      ["16d", 3.5, 0.120, 0.162, 93],
+      ["20d", 4, 0.135, 0.177, 65],
+    ],
+  },
+  {
+    "name": "casing",
+    "title": "Casing nails",
+    "f1667": "CN", "table": 9,
+    "source": "FF-N-105B 3.6.7",
+    "use": "Door and window casing: heavier than a finishing nail, with a cupped countersunk head.",
+    "head": "casing", "measured": "overall",
+    "shank": "smooth", "point": "diamond", "coating": "bright",
+    "rows": [
+      ["3d", 1.25, 0.076, 0.113, 654],
+      ["4d", 1.5, 0.080, 0.120, 489],
+      ["5d", 1.75, 0.080, 0.120, 414],
+      ["6d", 2, 0.099, 0.142, 244],
+      ["7d", 2.25, 0.099, 0.142, 215],
+      ["8d", 2.5, 0.113, 0.155, 147],
+      ["9d", 2.75, 0.113, 0.155, 133],
+      ["10d", 3, 0.128, 0.170, 96],
+      ["12d", 3.25, 0.128, 0.170, 88],
+      ["16d", 3.5, 0.135, 0.177, 74],
+    ],
+  },
+  {
+    "name": "gypsum-wallboard",
+    "title": "Gypsum wallboard nails, smooth shank",
+    "f1667": "GWS", "table": 26,
+    "source": "FF-N-105B 3.6.20",
+    "use": "Gypsum board to wood framing (ASTM C514). Named by gauge, length and head, since two rows share a length.",
+    "head": "flat", "measured": "under-head",
+    "shank": "smooth", "point": "diamond", "coating": "blued",
+    "rows": [
+      ["13ga-1.125in-0.297", 1.125, 0.092, 0.297, 473],
+      ["13ga-1.125in-0.375", 1.125, 0.092, 0.375, 449],
+      ["13ga-1.25in-0.297", 1.25, 0.092, 0.297, 425],
+      ["12ga-1.25in-0.375", 1.25, 0.106, 0.375, 310],
+      ["13ga-1.75in-0.375", 1.75, 0.092, 0.375, 295],
+    ],
+  },
+  {
+    "name": "gypsum-wallboard-ring",
+    "title": "Gypsum wallboard nails, ring shank",
+    "f1667": "GWM", "table": 27,
+    "source": "FF-N-105B 3.6.20.1",
+    "use": "Gypsum board to wood framing (ASTM C514), with annular rings and a long diamond point to resist popping. 1-1/8, 1-1/4 and 1-3/8 are the source's recommended sizes.",
+    "head": "flat", "measured": "under-head",
+    "shank": "ring", "point": "long-diamond", "coating": "blued",
+    "rows": [
+      ["12.5ga-1.125in", 1.125, 0.099, 0.250, 380],
+      ["12.5ga-1.25in", 1.25, 0.099, 0.250, 345],
+      ["12.5ga-1.375in", 1.375, 0.099, 0.250, 320],
+      ["12.5ga-1.5in", 1.5, 0.099, 0.250, 290],
+      ["12.5ga-1.625in", 1.625, 0.099, 0.250, 270],
+    ],
+  },
+  {
+    "name": "roofing",
+    "title": "Roofing nails",
+    "f1667": "RFS", "table": 29,
+    "source": "FF-N-105B 3.6.21.1",
+    "use": "Asphalt shingles and roofing felt: a broad flat head on a short shank. Two of the source's wire and head pairs, 12 gauge with a 3/8 in. head and 11 gauge with a 7/16 in. head, in every length it lists for them. Hot-dip galvanized by default, since a roof is outdoors by definition.",
+    "head": "flat", "measured": "under-head",
+    "shank": "smooth", "point": "diamond", "coating": "hot-dip-galvanized",
+    "rows": [
+      ["12ga-0.75in", 0.75, 0.106, 0.375, 464],
+      ["12ga-0.875in", 0.875, 0.106, 0.375, 406],
+      ["12ga-1in", 1, 0.106, 0.375, 361],
+      ["12ga-1.125in", 1.125, 0.106, 0.375, 325],
+      ["12ga-1.25in", 1.25, 0.106, 0.375, 295],
+      ["12ga-1.5in", 1.5, 0.106, 0.375, 249],
+      ["12ga-1.75in", 1.75, 0.106, 0.375, 216],
+      ["11ga-0.75in", 0.75, 0.120, 0.438, 340],
+      ["11ga-0.875in", 0.875, 0.120, 0.438, 300],
+      ["11ga-1in", 1, 0.120, 0.438, 267],
+      ["11ga-1.125in", 1.125, 0.120, 0.438, 241],
+      ["11ga-1.25in", 1.25, 0.120, 0.438, 220],
+      ["11ga-1.5in", 1.5, 0.120, 0.438, 187],
+      ["11ga-1.75in", 1.75, 0.120, 0.438, 162],
+    ],
+  },
+  {
+    "name": "connector",
+    "title": "Connector nails",
+    "f1667": None, "table": None,
+    "source": "MiTek nail table",
+    "use": "Common-nail wire cut short for the holes of joist hangers and other metal connectors. Hot-dip galvanized by default, as connectors are sold to be nailed with.",
+    "head": "flat", "measured": "under-head",
+    "shank": "smooth", "point": "diamond", "coating": "hot-dip-galvanized",
+    "rows": [
+      ["8d-1.5in", 1.5, 0.131, 0.281, None],
+      ["10d-1.5in", 1.5, 0.148, 0.312, None],
+      ["16d-2.5in", 2.5, 0.162, 0.344, None],
+    ],
+  },
+] -%}
+
+{#- 2.875 -> "2-7/8": how the source tables write a length. -#}
+{%- macro inches(x) -%}
+{%- set whole = x | int -%}
+{%- set sixteenths = ((x - whole) * 16) | round | int -%}
+{%- set fraction = {1: "1/16", 2: "1/8", 3: "3/16", 4: "1/4", 5: "5/16", 6: "3/8", 7: "7/16", 8: "1/2", 9: "9/16", 10: "5/8", 11: "11/16", 12: "3/4", 13: "13/16", 14: "7/8", 15: "15/16"} -%}
+{%- if sixteenths == 0 -%}{{ whole }}{%- elif whole == 0 -%}{{ fraction[sixteenths] }}{%- else -%}{{ whole }}-{{ fraction[sixteenths] }}{%- endif -%}
+{%- endmacro -%}

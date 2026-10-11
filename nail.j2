@@ -1,0 +1,46 @@
+{#-
+  What every nail part shares, whichever sub-package declares it.
+
+  Imported by 'imperial.yaml' and 'metric.yaml'. Everything here is a value
+  rather than a block of YAML: 'pc lint' masks the template's tags and not what
+  a macro would expand to, so each package spells its parts out itself and
+  takes the expressions those parts are built from from here, once.
+
+  The expressions are PartCAD's '%...%' over the parameters every nail part
+  declares (d, length, measured, head, head_d, coating, material). They have to
+  agree with 'nail.py': the head is as thick as FLAT_T says there, and a nail
+  goes as deep as DEPTH says there.
+-#}
+
+{%- set FLAT_T = "max(0.4, 0.35 * d)" -%}
+{%- set DEPTH = "(length - (max(0.4, 0.35 * d) if (head == 'flat' and measured == 'overall') else 0))" -%}
+{%- set HEAD_D = "(head_d if head_d > 0 else 2 * d)" -%}
+{#- Closer to the head than to the point, and never within a head's width of it. -#}
+{%- set GRIP = "min(max(" ~ DEPTH ~ " / 4, " ~ HEAD_D ~ "), " ~ DEPTH ~ " / 2)" -%}
+
+{#-
+  What makes a nail an outdoor nail: a zinc coating heavy enough for exterior
+  use, or a metal that needs none. See "Outdoor" in the root package's docs.
+-#}
+{%- set METAL = "//pub/std/manufacturing/material/metal:" -%}
+{%- set materials = ["steel-1018", "ss-304", "ss-316l", "cu-c110", "al-6061-t6"] -%}
+{%- set outdoor_materials = ["ss-304", "ss-316l", "cu-c110"] -%}
+{%- set coatings = ["bright", "cement-coated", "blued", "phosphate", "electro-galvanized", "mechanically-galvanized", "hot-dip-galvanized"] -%}
+{%- set OUTDOOR = "('-outdoor' if (coating == 'hot-dip-galvanized' or material.split(':')[-1] in " ~ outdoor_materials ~ ") else '')" -%}
+
+{#-
+  The interfaces a nail implements, as the keys of its 'implements:'. They are
+  the root package's, named relative to the sub-package ('..'), so that the
+  three packages of this repository find each other wherever they are loaded.
+-#}
+{%- set POINT = "..:nail-point%" ~ OUTDOOR ~ "%;d=%round(d, 1)%" -%}
+{%- set HEAD = "..:nail-head" -%}
+{%- set GRASP = "..:nail-grip;d=%d%" -%}
+
+{#-
+  A number as PartCAD writes it into an interface's name: 4.0 is "4", 3.3274
+  is "3.3274". 'connect.hold' names the grip a part implements, and that is a
+  plain string compared with the name the part's expression produced, so the
+  two have to be spelled alike.
+-#}
+{%- macro number(x) -%}{{ x | int if x == (x | int) else x }}{%- endmacro -%}

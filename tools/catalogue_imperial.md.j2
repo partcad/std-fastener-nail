@@ -1,0 +1,23 @@
+{% from 'imperial.j2' import families, inches %}{% from 'nail.j2' import number %}
+# The imperial nails of `//pub/std/fastener/nail/imperial`
+
+Every size, as ASTM F1667 and the federal specification it replaced
+(FF-N-105B) state it. Each part is `//pub/std/fastener/nail/imperial:<family>/<size>`.
+Lengths and diameters are in inches, as the tables give them; the parts carry
+them in millimetres. "Point" is the `nail-point` interface the nail implements,
+which decides where it fits. "8d / 6d" is the pointside penetration EN 1995-1-1
+asks of it, smooth and profiled. "Per lb" is the source's approximate count per
+pound, for a bright smooth nail. See [CLASSIFICATION.md](CLASSIFICATION.md) for
+what the columns mean and [README_imperial.md](README_imperial.md) for the
+families.
+{% for f in families %}
+## {{ f.title }}{% if f.f1667 %}: F1667 {% for id in f.f1667.split('/') %}`NL{{ id }}`{% if not loop.last %}, {% endif %}{% endfor %} (Table{{ "s" if "-" in (f.table | string) else "" }} {{ f.table }}){% endif %}
+
+{{ f.use }} {{ f.head | capitalize }} head, length measured {{ "under the head" if f.measured == "under-head" else "overall" }}; by default {{ f.shank }} shank, {{ f.point }} point, {{ f.coating }}. From {{ f.source }}.
+
+| Part | L, in. | D, in. | H, in. | L x d, mm | Point | 8d / 6d, mm | Per lb |
+|---|---|---|---|---|---|---|---|
+{%- for row in f.rows %}
+| `{{ f.name }}/{{ row[0] }}` | {{ inches(row[1]) }} | {{ "%.3f" | format(row[2]) }} | {{ "%.3f" | format(row[3]) }} | {{ "%.1f" | format(row[1] * INCH) }} x {{ "%.2f" | format(row[2] * INCH) }} | `d={{ number((row[2] * INCH) | round(1)) }}` | {{ (8 * row[2] * INCH) | round(1) }} / {{ (6 * row[2] * INCH) | round(1) }} | {{ row[4] if row[4] else "-" }} |
+{%- endfor %}
+{% endfor %}

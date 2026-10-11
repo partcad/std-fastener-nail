@@ -1,0 +1,51 @@
+description: |
+  The words the classification is written in, left to right: the four heads
+  (flat, countersunk, casing, brad - a 6d common, sinker, casing and
+  finishing nail), the three shanks (smooth, ring, screw) and the five points
+  (diamond, long diamond, needle, blunt, chisel), each on a 6d common nail.
+  Every nail stands on z = 0, the plane its head is flush with once driven.
+links:
+  - part: imperial:common/6d
+    name: head-common
+    location: [[0, 0, 0], [0, 0, 1], 0]
+  - part: imperial:sinker/6d
+    name: head-sinker
+    location: [[12, 0, 0], [0, 0, 1], 0]
+  - part: imperial:casing/6d
+    name: head-casing
+    location: [[24, 0, 0], [0, 0, 1], 0]
+  - part: imperial:finishing/6d
+    name: head-finishing
+    location: [[36, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: shank-smooth
+    params: { shank: smooth }
+    location: [[60, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: shank-ring
+    params: { shank: ring }
+    location: [[72, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: shank-screw
+    params: { shank: screw }
+    location: [[84, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: point-diamond
+    params: { point: diamond }
+    location: [[108, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: point-long-diamond
+    params: { point: long-diamond }
+    location: [[120, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: point-needle
+    params: { point: needle }
+    location: [[132, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: point-blunt
+    params: { point: blunt }
+    location: [[144, 0, 0], [0, 0, 1], 0]
+  - part: imperial:common/6d
+    name: point-chisel
+    params: { point: chisel }
+    location: [[156, 0, 0], [0, 0, 1], 0]

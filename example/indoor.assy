@@ -1,0 +1,27 @@
+description: |
+  A post indoors takes any nail. One imperial and one metric: a bright 16d
+  common nail driven home, and a hot-dip galvanized 3.4 x 90 mm wire nail - an
+  outdoor nail, which goes wherever any nail does - driven 40 mm of the 88.9 mm
+  it will go.
+
+  Neither connection names an interface. The nail's point and the post's target
+  are found by their mating, and the target's 'drive' says how far in each nail
+  is.
+links:
+  - part: example/post
+    name: post
+
+  - part: imperial:common/16d
+    name: bright
+    connect:
+      name: post
+      toInstance: A
+      toParams: { drive: 88.9 }
+
+  - part: metric:flat/3.4x90
+    name: galvanized
+    params: { coating: hot-dip-galvanized }
+    connect:
+      name: post
+      toInstance: B
+      toParams: { drive: 40 }

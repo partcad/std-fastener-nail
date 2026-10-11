@@ -1,0 +1,25 @@
+description: |
+  A post outdoors takes outdoor nails only: a hot-dip galvanized 16d common nail
+  driven home, and a stainless 3.4 x 90 mm wire nail driven 40 mm. The bright
+  16d of the indoor example has no mating with this post - 'nail-target-outdoor'
+  mates 'nail-point-outdoor' and nothing else - so connecting one to it finds no
+  ports to put it on.
+links:
+  - part: example/deck-post
+    name: post
+
+  - part: imperial:common/16d
+    name: galvanized
+    params: { coating: hot-dip-galvanized }
+    connect:
+      name: post
+      toInstance: A
+      toParams: { drive: 88.9 }
+
+  - part: metric:flat/3.4x90
+    name: stainless
+    params: { material: "//pub/std/manufacturing/material/metal:ss-304" }
+    connect:
+      name: post
+      toInstance: B
+      toParams: { drive: 40 }

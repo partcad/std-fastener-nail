@@ -1,0 +1,226 @@
+{#-
+  The metric nails: the sizes below are generated from 'metric.j2', every part
+  is built by 'nail.py', and implements the interfaces of the package above
+  this one ('partcad.yaml' beside this file) through the expressions in
+  'nail.j2'.
+-#}
+{%- from 'metric.j2' import families, sizes, heads, en10230_heads -%}
+{%- from 'nail.j2' import FLAT_T, DEPTH, GRIP, METAL, materials, coatings, POINT, HEAD, GRASP, number -%}
+
+{#- Where each head diameter comes from, said in full. -#}
+{%- set head_sources = {
+  "EN 10230-1": "EN 10230-1 Table 1",
+  "interpolated": "interpolated in EN 10230-1 Table 1, which has no row for it",
+  "2d": "twice the wire, EN 10230-1's rule from 3.8 mm up",
+} -%}
+
+partcad: ">=0.8.170"
+desc: >-
+  Metric nails: plain-shank wire nails in the sizes of DIN 1151, flat and
+  countersunk, with the heads EN 10230-1 gives them, and a nail of any size as
+  EN 14592 has one declared.
+
+docs:
+  name: //pub/std/fastener/nail/metric
+  intro: |
+    Metric nails for timber construction. Every one has the four ports and
+    implements the interfaces of [`//pub/std/fastener/nail`](README.md), which
+    also says how they are classified and what "outdoor" means.
+
+    <table><tr>
+    <td align=center valign=bottom><a href="./flat/3.1x80.svg"><img src="./flat/3.1x80.svg" height="220"></a><br/><code>flat/3.1x80</code></td>
+    <td align=center valign=bottom><a href="./countersunk/3.1x80.svg"><img src="./countersunk/3.1x80.svg" height="220"></a><br/><code>countersunk/3.1x80</code></td>
+    <td align=center valign=bottom><a href="./nail.svg"><img src="./nail.svg" height="220"></a><br/><code>nail</code></td>
+    </tr></table>
+
+    ## Any nail: `nail`
+
+    EN 14592 does not list sizes: a manufacturer declares a nail's diameter,
+    length and head, whether its shank is smooth or profiled, and its strength,
+    and EN 1995-1-1 designs with what was declared. `nail` is that declaration's
+    geometry - any diameter, any length, any head - by default a 3.1 x 90 mm
+    flat-headed framing nail, with a head twice the wire unless it says
+    otherwise:
+
+    ```shell
+    pc info "//pub/std/fastener/nail/metric:nail;d=2.8,length=63,shank=ring"
+    ```
+
+    Its shank is a parameter, so its grasp, `nail-grip;d=<d>`, is too, and it
+    names none in `connect.hold`, which takes no expressions: an assembly
+    holding one names it in `how.holdWith`.
+
+    ## The DIN 1151 sizes
+
+    DIN 1151 named the classic construction nail by its wire and length - 3.1 x
+    80 - in two head forms, and its sizes are how these nails are still sold,
+    although EN 10230-1 has replaced it. Each part is `<form>/<d>x<l>`, in
+    millimetres. The dimensions are fixed; the shank, the point, the coating and
+    the material are parameters, and a flat head's length is measured from under
+    it, a countersunk one's overall.
+
+    The heads are EN 10230-1's (Table 1, for circular, flat, flat countersunk
+    and cup heads on a plain shank):
+
+    | d, mm |{% for d in en10230_heads %} {{ number(d) }} |{% endfor %}
+    |---|{% for d in en10230_heads %}---|{% endfor %}
+    | head, mm |{% for d in en10230_heads %} {{ number(en10230_heads[d]) }} |{% endfor %}
+
+    DIN 1151 has three wires that table does not - 2.5, 2.8 and 3.1 mm, where it
+    has 2.4, 2.7 and 3.0 - and their heads are interpolated in it; its 7.6 and
+    8.8 mm wires take the table's own rule from 3.8 mm up, twice the wire.
+
+    | Family | DIN 1151 | Head | Length | Sizes |
+    |---|---|---|---|---|
+    {%- for f in families %}
+    | `{{ f.name }}` | form {{ f.din1151 }} | {{ f.head }} | {{ "under the head" if f.measured == "under-head" else "overall" }} | {{ sizes | length }}: `{{ "%.1f" | format(sizes[0][0]) }}x{{ sizes[0][1] }}` to `{{ "%.1f" | format(sizes[-1][0]) }}x{{ sizes[-1][1] }}` |
+    {%- endfor %}
+
+    Every size, with its head, where the head comes from, its point interface
+    and what EN 1995-1-1 asks of its penetration, is in
+    [CATALOGUE_metric.md](CATALOGUE_metric.md).
+
+  usage: |
+    ```shell
+    pc list parts //pub/std/fastener/nail/metric
+    pc info //pub/std/fastener/nail/metric:flat/3.1x80
+    pc info "//pub/std/fastener/nail/metric:countersunk/3.4x90;shank=ring,coating=hot-dip-galvanized"
+    pc info "//pub/std/fastener/nail/metric:nail;d=2.8,length=63,shank=ring"
+    ```
+
+parts:
+{%- for f in families %}
+{%- for d, l, count in sizes %}
+  {%- set head_d, head_from = heads[d] %}
+
+  {{ f.name }}/{{ "%.1f" | format(d) }}x{{ l }}:
+    type: build123d
+    path: nail.py
+    desc: >-
+      {{ "%.1f" | format(d) }} x {{ l }} mm {{ f.title | lower | replace("nails", "nail") }}:
+      a DIN 1151 form {{ f.din1151 }} size, with a {{ head_d }} mm head ({{ head_sources[head_from] }}).
+    parameters:
+      d:
+        type: float
+        desc: The shank, before any deformation, in mm
+        enum: [{{ d }}]
+        default: {{ d }}
+      length:
+        type: float
+        desc: The length, measured {{ f.measured }}, in mm
+        enum: [{{ l }}.0]
+        default: {{ l }}.0
+      measured:
+        type: string
+        enum: [{{ f.measured }}]
+        default: {{ f.measured }}
+      head:
+        type: string
+        enum: [{{ f.head }}]
+        default: {{ f.head }}
+      head_d:
+        type: float
+        desc: The head, in mm
+        enum: [{{ head_d }}]
+        default: {{ head_d }}
+      shank:
+        type: string
+        enum: [smooth, ring, screw]
+        default: smooth
+      point:
+        type: string
+        enum: [diamond, long-diamond, needle, blunt, chisel]
+        default: diamond
+      coating:
+        type: string
+        enum: {{ coatings }}
+        default: bright
+      material:
+        type: string
+        enum:
+        {%- for m in materials %}
+          - "{{ METAL }}{{ m }}"
+        {%- endfor %}
+        default: "{{ METAL }}steel-1018"
+    implements:
+      "{{ POINT }}": [[0, 0, "%-{{ DEPTH }}%"], [0, 0, 1], 0]
+      "{{ HEAD }}": [[0, 0, "%{{ FLAT_T }} if head == 'flat' else 0%"], [1, 0, 0], 180]
+      "{{ GRASP }}": [[0, 0, "%-{{ GRIP }}%"], [0, 0, 1], 0]
+    connect:
+      # By its grasp, both jaws at once - see "Holding" in the root package.
+      hold: "nail-grip;d={{ number(d) }}"
+      holdForceMin: 5
+      holdForceMax: 50
+    {%- if d == 3.1 and l == 80 %}
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+    {%- endif %}
+{%- endfor %}
+{%- endfor %}
+
+  nail:
+    type: build123d
+    desc: >-
+      A nail of any size, by the dimensions EN 14592 has a nail declared by - by
+      default a 3.1 x 90 mm flat-headed framing nail.
+    parameters:
+      d:
+        type: float
+        desc: The shank, before any deformation, in mm
+        default: 3.1
+      length:
+        type: float
+        desc: The length, in mm
+        default: 90.0
+      measured:
+        type: string
+        desc: Whether the length is from under the head or overall
+        enum: [under-head, overall]
+        default: under-head
+      head:
+        type: string
+        enum: [flat, countersunk, casing, brad]
+        default: flat
+      head_d:
+        type: float
+        desc: The head, in mm; 0 for twice the shank, the head EN 1995-1-1 8.3.1.3 assumes
+        default: 0.0
+      shank:
+        type: string
+        enum: [smooth, ring, screw]
+        default: smooth
+      point:
+        type: string
+        enum: [diamond, long-diamond, needle, blunt, chisel]
+        default: diamond
+      coating:
+        type: string
+        enum: {{ coatings }}
+        default: bright
+      material:
+        type: string
+        enum:
+        {%- for m in materials %}
+          - "{{ METAL }}{{ m }}"
+        {%- endfor %}
+        default: "{{ METAL }}steel-1018"
+    implements:
+      "{{ POINT }}": [[0, 0, "%-{{ DEPTH }}%"], [0, 0, 1], 0]
+      "{{ HEAD }}": [[0, 0, "%{{ FLAT_T }} if head == 'flat' else 0%"], [1, 0, 0], 180]
+      "{{ GRASP }}": [[0, 0, "%-{{ GRIP }}%"], [0, 0, 1], 0]
+    # No 'connect.hold': the grasp is as wide as 'd', which is a parameter here,
+    # and 'hold' is a name rather than an expression. See the docs above.
+    render:
+      svg:
+        reproducible: true
+        precision: 4
+
+render:
+  readme:
+    path: README_metric.md
+    exclude:
+      - parts
+      - interfaces
+      - sketches
