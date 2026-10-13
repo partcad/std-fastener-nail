@@ -15,7 +15,7 @@ everywhere in PartCAD, each one's `+Z` points *into* the nail:
 | Port | Interface | Where | `+Z` |
 |---|---|---|---|
 | `tip` | `nail-point` or `nail-point-outdoor` | the very end of the point, `z = -L` | up the shank |
-| `head` | `nail-head` | the middle of the top of the head | down the shank |
+| `head` | `nail-head` | the middle of the top of the head, drawn at the head's diameter | down the shank |
 | `left-grip`, `right-grip` | `nail-grip` | on the shank, on opposite sides | across it, at the axis |
 
 `L` is how far the nail goes in: its length, except for a flat-headed nail
@@ -178,5 +178,11 @@ way a target mates a point - by the widest shank its jaws open to.
 
 ## Striking: `nail-head`
 
-Where a hammer's face, a nailer's driver or a nail set meets the nail. It
-mates with nothing yet either.
+Where a hammer's face, a nailer's driver or a nail set meets the nail.
+`nail-head;d=` is parametrized by the head's diameter, which its port is
+drawn at: `head_d`, or twice the shank for a metric `nail` that leaves
+`head_d` at 0. A nail names the head it has rather than restating the
+outline of a common one, because PartCAD lets only an interface's
+`inherits:` restate a boundary, never a part's `implements:`. It mates with
+nothing yet either; a driver's interface would mate it the way a target
+mates a point.
