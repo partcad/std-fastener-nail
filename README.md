@@ -36,7 +36,7 @@ and a 3.4 x 90 mm wire nail go into the same places, by the same rules.
 | `nail-point;d=` | A nail's tip, by its shank to 0.1 mm - what decides where it fits. |
 | `nail-point-outdoor;d=` | The tip of a nail that lasts outdoors: hot-dip galvanized, stainless or copper. It fits indoor targets too. |
 | `nail-grip;d=` | One grasp across the shank: two opposite ports for a gripper's two jaws. What every catalogue nail is held by. |
-| `nail-head` | Where a hammer, a nailer's driver or a nail set strikes. |
+| `nail-head;d=` | Where a hammer, a nailer's driver or a nail set strikes, drawn at the head's diameter. |
 
 [INTERFACES.md](INTERFACES.md) says how each of them works and why - the
 four ports, the 0.1 mm inheritance chain that lets a target take every

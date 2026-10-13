@@ -32,9 +32,12 @@
   The interfaces a nail implements, as the keys of its 'implements:'. They are
   the root package's, named relative to the sub-package ('..'), so that the
   three packages of this repository find each other wherever they are loaded.
+  Each one is parametrized by the size its ports are drawn at - the shank for
+  the point and the grip, the head's diameter for the head - because an
+  outline is the interface's to draw, not the part's to redraw.
 -#}
 {%- set POINT = "..:nail-point%" ~ OUTDOOR ~ "%;d=%round(d, 1)%" -%}
-{%- set HEAD = "..:nail-head" -%}
+{%- set HEAD = "..:nail-head;d=%" ~ HEAD_D ~ "%" -%}
 {%- set GRASP = "..:nail-grip;d=%d%" -%}
 
 {#-
