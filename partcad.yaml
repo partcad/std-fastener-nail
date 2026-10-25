@@ -162,11 +162,9 @@ interfaces:
       "%{{ NARROWER | replace('FAMILY', 'nail-target') }}%":
         "":
           sketch: "nail-circle;d=%width%"
-    mates:
-      # A nail makes its own hole: the two are expected to share the space it
-      # displaces, which is what 'snapIn' tells 'pc test'.
-      "nail-point;d=%round(width, 1)%":
-        snapIn: true
+    # That the nail and the wood share the space the nail displaces is said by
+    # the nail's point, not here: see 'nail-point'.
+    mates: "nail-point;d=%round(width, 1)%"
 
   nail-target-outdoor:
     desc: A place outdoors to drive a nail up to %width% mm across into, up to %depth% mm deep - an outdoor nail only
@@ -184,9 +182,7 @@ interfaces:
       "%{{ NARROWER | replace('FAMILY', 'nail-target-outdoor') }}%":
         "":
           sketch: "nail-circle;d=%width%"
-    mates:
-      "nail-point-outdoor;d=%round(width, 1)%":
-        snapIn: true
+    mates: "nail-point-outdoor;d=%round(width, 1)%"
 
   #
   # The nail's own.
@@ -199,6 +195,13 @@ interfaces:
     ports:
       tip:
         sketch: "nail-circle;d=%d%"
+        # A nail makes its own hole, whatever it is driven into: the nail and
+        # the wood are expected to share the space it displaces, which is what
+        # 'selfScrew' tells 'pc test'. Said by the point rather than by each
+        # target's mating because it is true wherever the point goes - and
+        # because a connection that names the ports alone ('withPort: tip')
+        # looks up no mating, and still reads the port.
+        selfScrew: true
 
   # A drop-in for 'nail-point': an outdoor nail goes wherever any nail does.
   nail-point-outdoor:
