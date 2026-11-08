@@ -30,9 +30,9 @@ url: https://github.com/partcad/std-fastener-nail
 # 16d common nail", they sell a box of them under an SKU. What can be ordered is
 # a store's instance of one of these parts with its vendor and SKU on it - the
 # way '//pub/svc/commerce/homedepot' declares its lumber as instances of
-# '//pub/std/imperial/dimensional-lumber' - and that instance is what 'pc test'
-# should hold to being obtainable. So nothing here claims to be, and the
-# sub-packages inherit that.
+# '//pub/std/imperial/dimensional-lumber' - and that instance is what
+# 'pc qual test' should hold to being obtainable. So nothing here claims to be,
+# and the sub-packages inherit that.
 manufacturable: false
 
 cover:
@@ -104,7 +104,7 @@ docs:
     pc list parts -r //pub/std/fastener/nail                   # every nail
     pc info -i "//pub/std/fastener/nail:nail-target;width=6,depth=88.9"
     pc render -t svg --with-ports //pub/std/fastener/nail/imperial:common/16d
-    pc test -a //pub/std/fastener/nail:example/indoor          # nails driven into a post
+    pc qual test -a //pub/std/fastener/nail:example/indoor     # nails driven into a post
     ```
 
     From another package, a place to nail into:
@@ -164,7 +164,7 @@ interfaces:
           sketch: "nail-circle;d=%width%"
     mates:
       # A nail makes its own hole: the two are expected to share the space it
-      # displaces, which is what 'snapIn' tells 'pc test'.
+      # displaces, which is what 'snapIn' tells 'pc qual test'.
       "nail-point;d=%round(width, 1)%":
         snapIn: true
 

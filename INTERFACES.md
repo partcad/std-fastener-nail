@@ -61,17 +61,17 @@ point of exactly its own width, so the 6 mm target mates every point from
 0.5 to 6 mm through what it inherits, and nothing wider.
 
 A mating is what lets an assembly say only which part a nail goes into and
-have PartCAD find the ports, and what tells `pc test` that the nail and the
-wood are meant to share the space the nail displaces (`snapIn`).
+have PartCAD find the ports, and what tells `pc qual test` that the nail and
+the wood are meant to share the space the nail displaces (`snapIn`).
 
 A mating is not what allows a connection, though. A connection that names the
 ports (`withPort: tip`, `toPort: A-entry`) places a nail whether or not its
-interfaces mate - a bright nail in an outdoor post included - and `pc test`
-reports the overlap, as it reports any overlap no joint accounts for. A
-connection that names neither the ports nor the interfaces, and whose two ends
-have no mating, has nothing to place the nail by: PartCAD warns that it could
-not find the peer ports and leaves the nail at the post's origin. Every one of
-these is a warning; `pc test` passes.
+interfaces mate - a bright nail in an outdoor post included - and
+`pc qual test` reports the overlap, as it reports any overlap no joint
+accounts for. A connection that names neither the ports nor the interfaces,
+and whose two ends have no mating, has nothing to place the nail by: PartCAD
+warns that it could not find the peer ports and leaves the nail at the post's
+origin. Every one of these is a warning; `pc qual test` passes.
 
 One thing to know about naming ports: PartCAD 0.8.170 does not look up which
 interfaces the named ports belong to (`FIXME: PC-10` in its
