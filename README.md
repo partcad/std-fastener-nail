@@ -52,7 +52,7 @@ sources.
 pc list parts -r //pub/std/fastener/nail                   # every nail
 pc info -i "//pub/std/fastener/nail:nail-target;width=6,depth=88.9"
 pc render -t svg --with-ports //pub/std/fastener/nail/imperial:common/16d
-pc test -a //pub/std/fastener/nail:example/indoor          # nails driven into a post
+pc qual test -a //pub/std/fastener/nail:example/indoor     # nails driven into a post
 ```
 
 From another package, a place to nail into:
